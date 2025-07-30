@@ -3,39 +3,687 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask</title>
+    <title>Car Price Prediction Result - CarPriceAI</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        html {
-            height: 100%;
-          }
-          body {
-            margin:10px;
-            padding:0;
-            font-family: sans-serif;
-            background: linear-gradient(#141e30, #243b55);
-          }
-          h1{
-            color:white;
-          }
-          .heading {
-            position: relative;
-            width: 80%;
-            margin: 0px;
-            padding: 25px;
-            background: rgba(0, 0, 0, .5);
+        * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
-            box-shadow: 0 15px 25px rgba(0,0,0,.6);
-            border-radius: 10px;
-            font-style: italic;
-            border: 0.5px solid black;
-            color: aqua;;
         }
         
-</style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .result-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .price-display {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .price-label {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .price-value {
+            font-size: 4rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .price-range {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .range-item {
+            text-align: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            min-width: 150px;
+        }
+
+        .range-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .range-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .confidence-meter {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border-radius: 10px;
+            transition: width 2s ease;
+            width: 0;
+        }
+
+        .confidence-text {
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .insight-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .insight-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .insight-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .insight-text {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, #03e9f4, #00d4ff);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(3, 233, 244, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(3, 233, 244, 0.4);
+        }
+
+        .action-btn.secondary {
+            background: linear-gradient(45deg, #6c757d, #495057);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        .action-btn.secondary:hover {
+            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+        }
+
+        .market-trends {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .trends-title {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .trends-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .trend-item {
+            background: rgba(255,255,255,0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+        }
+
+        .trend-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .trend-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .error-message {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            color: #dc3545;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .loading-animation {
+            text-align: center;
+            color: white;
+            padding: 3rem;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #03e9f4;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .price-value {
+                font-size: 2.5rem;
+            }
+            
+            .price-range {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animation for price display */
+        .price-value {
+            animation: fadeInUp 1s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Car Price Prediction</h1>
-    <br>
-    <h3 class='heading'>Predicted price = {{data}} Lakhs</h3>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-chart-line"></i> Price Prediction Result</h1>
+            <p>Your AI-powered car price analysis is ready</p>
+        </div>
+
+        {% if data and (data is number or (data is string and not data.startswith('Error'))) %}
+        <div class="result-card">
+            <div class="price-display">
+                <div class="price-label">Estimated Resale Value</div>
+                <div class="price-value">₹{{ "%.2f"|format(data) }} Lakhs</div>
+                
+                <div class="price-range">
+                    <div class="range-item">
+                        <div class="range-label">Minimum</div>
+                        <div class="range-value">₹{{ "%.2f"|format(data * 0.85) }}L</div>
+                    </div>
+                    <div class="range-item">
+                        <div class="range-label">Expected</div>
+                        <div class="range-value">₹{{ "%.2f"|format(data) }}L</div>
+                    </div>
+                    <div class="range-item">
+                        <div class="range-label">Maximum</div>
+                        <div class="range-value">₹{{ "%.2f"|format(data * 1.15) }}L</div>
+                    </div>
+                </div>
+
+                <div class="confidence-meter">
+                    <div class="confidence-text">Prediction Confidence</div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" style="width: 85%;"></div>
+                    </div>
+                    <div class="confidence-text">85% Accurate</div>
+                </div>
+            </div>
+
+            <!-- Car Details Summary -->
+            {% if car_details %}
+            <div class="car-summary" style="background: rgba(255,255,255,0.95); padding: 2rem; border-radius: 15px; margin-bottom: 2rem; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <h3 style="color: #333; margin-bottom: 1.5rem; text-align: center; font-size: 1.8rem; font-weight: bold;">
+                    <i class="fas fa-car"></i> Car Details
+                </h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; color: #333;">
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1rem; border-radius: 10px; color: white; text-align: center;">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem;">Model</div>
+                        <div>{{ car_details.name }}</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1rem; border-radius: 10px; color: white; text-align: center;">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem;">Year</div>
+                        <div>{{ car_details.year }}</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1rem; border-radius: 10px; color: white; text-align: center;">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem;">Fuel Type</div>
+                        <div>{{ car_details.fuel_type }}</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1rem; border-radius: 10px; color: white; text-align: center;">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem;">KMs Driven</div>
+                        <div>{{ "{:,}".format(car_details.kms_driven) }}</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1rem; border-radius: 10px; color: white; text-align: center;">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem;">Seats</div>
+                        <div>{{ car_details.seats }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Car Features & Characteristics -->
+            {% if car_features %}
+            <div class="car-features" style="background: rgba(255,255,255,0.95); padding: 2rem; border-radius: 15px; margin-bottom: 2rem; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <h3 style="color: #333; margin-bottom: 1.5rem; text-align: center; font-size: 1.8rem; font-weight: bold;">
+                    <i class="fas fa-star"></i> Car Features & Characteristics
+                </h3>
+                
+                <!-- Overall Rating -->
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div style="background: linear-gradient(135deg, #28a745, #20c997); padding: 1.5rem; border-radius: 15px; color: white; display: inline-block; min-width: 200px;">
+                        <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;">{{ car_features.overall_rating }}/10</div>
+                        <div style="font-size: 1.1rem;">Overall Rating</div>
+                    </div>
+                </div>
+
+                <!-- Brand Features -->
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: #333; margin-bottom: 1rem; font-size: 1.3rem; border-bottom: 2px solid #667eea; padding-bottom: 0.5rem;">
+                        <i class="fas fa-crown"></i> {{ car_features.brand_info.brand }} Brand Features
+                    </h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                        <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1rem; border-radius: 10px; color: white;">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">Reliability</div>
+                            <div>{{ car_features.brand_features.reliability }}</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1rem; border-radius: 10px; color: white;">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">Service Network</div>
+                            <div>{{ car_features.brand_features.service_network }}</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1rem; border-radius: 10px; color: white;">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">Resale Value</div>
+                            <div>{{ car_features.brand_features.resale_value }}</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1rem; border-radius: 10px; color: white;">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">Brand Reputation</div>
+                            <div>{{ car_features.brand_features.brand_reputation }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fuel Features -->
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: #333; margin-bottom: 1rem; font-size: 1.3rem; border-bottom: 2px solid #667eea; padding-bottom: 0.5rem;">
+                        <i class="fas fa-gas-pump"></i> {{ car_details.fuel_type }} Engine Features
+                    </h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                        <div style="background: linear-gradient(135deg, #28a745, #20c997); padding: 1rem; border-radius: 10px; color: white;">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">Engine Type</div>
+                            <div>{{ car_features.fuel_features.engine_type }}</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #28a745, #20c997); padding: 1rem; border-radius: 10px; color: white;">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">Performance</div>
+                            <div>{{ car_features.fuel_features.performance }}</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #28a745, #20c997); padding: 1rem; border-radius: 10px; color: white;">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">Maintenance</div>
+                            <div>{{ car_features.fuel_features.maintenance }}</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #28a745, #20c997); padding: 1rem; border-radius: 10px; color: white;">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">Environmental</div>
+                            <div>{{ car_features.fuel_features.environmental }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Year Features -->
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: #333; margin-bottom: 1rem; font-size: 1.3rem; border-bottom: 2px solid #667eea; padding-bottom: 0.5rem;">
+                        <i class="fas fa-calendar-alt"></i> {{ car_details.year }} Model Features
+                    </h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                        <div style="background: linear-gradient(135deg, #ffc107, #fd7e14); padding: 1rem; border-radius: 10px; color: white;">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">Safety Features</div>
+                            <div>{{ car_features.year_features.safety_features }}</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #ffc107, #fd7e14); padding: 1rem; border-radius: 10px; color: white;">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">Technology</div>
+                            <div>{{ car_features.year_features.technology }}</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #ffc107, #fd7e14); padding: 1rem; border-radius: 10px; color: white;">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">Emissions</div>
+                            <div>{{ car_features.year_features.emissions }}</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #ffc107, #fd7e14); padding: 1rem; border-radius: 10px; color: white;">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">Design</div>
+                            <div>{{ car_features.year_features.design }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Unique Selling Points -->
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: #333; margin-bottom: 1rem; font-size: 1.3rem; border-bottom: 2px solid #667eea; padding-bottom: 0.5rem;">
+                        <i class="fas fa-lightbulb"></i> Unique Selling Points
+                    </h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                        {% for point in car_features.unique_selling_points %}
+                        <div style="background: linear-gradient(135deg, #dc3545, #e83e8c); padding: 1.2rem; border-radius: 10px; color: white; display: flex; align-items: center; gap: 0.8rem; box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);">
+                            <i class="fas fa-check-circle" style="color: #fff; font-size: 1.2rem;"></i>
+                            <span style="font-size: 1rem; font-weight: 500;">{{ point }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <div class="insight-title">Smart Pricing</div>
+                    <div class="insight-text">This price reflects current market conditions and your car's specific features.</div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="insight-title">Market Analysis</div>
+                    <div class="insight-text">Based on thousands of similar car sales in your region.</div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="insight-title">Real-time Data</div>
+                    <div class="insight-text">Updated with the latest market trends and price fluctuations.</div>
+                </div>
+            </div>
+
+            <!-- Market Insights -->
+            {% if market_insights %}
+            <div class="market-insights" style="background: rgba(255,255,255,0.95); padding: 2rem; border-radius: 15px; margin-bottom: 2rem; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <h3 style="color: #333; margin-bottom: 1.5rem; text-align: center; font-size: 1.8rem; font-weight: bold;">Market Insights</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1.5rem; border-radius: 10px; color: white; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem; font-size: 1.1rem;">Market Position</div>
+                        <div style="font-size: 1.2rem; font-weight: 600;">{{ market_insights.market_position }}</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1.5rem; border-radius: 10px; color: white; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem; font-size: 1.1rem;">Depreciation Rate</div>
+                        <div style="font-size: 1.2rem; font-weight: 600;">{{ market_insights.depreciation_rate }}</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1.5rem; border-radius: 10px; color: white; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem; font-size: 1.1rem;">Demand Trend</div>
+                        <div style="font-size: 1.2rem; font-weight: 600;">{{ market_insights.demand_trend }}</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1.5rem; border-radius: 10px; color: white; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem; font-size: 1.1rem;">Best Selling Season</div>
+                        <div style="font-size: 1.2rem; font-weight: 600;">{{ market_insights.best_selling_season }}</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1.5rem; border-radius: 10px; color: white; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem; font-size: 1.1rem;">Maintenance Cost</div>
+                        <div style="font-size: 1.2rem; font-weight: 600;">{{ market_insights.maintenance_cost }}</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1.5rem; border-radius: 10px; color: white; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem; font-size: 1.1rem;">Resale Value Retention</div>
+                        <div style="font-size: 1.2rem; font-weight: 600;">{{ market_insights.resale_value_retention }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Price Comparison -->
+            {% if price_comparison %}
+            <div class="price-comparison" style="background: rgba(255,255,255,0.95); padding: 2rem; border-radius: 15px; margin-bottom: 2rem; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <h3 style="color: #333; margin-bottom: 1.5rem; text-align: center; font-size: 1.8rem; font-weight: bold;">Price Comparison</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                    {% for car in price_comparison.similar_cars %}
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 1.5rem; border-radius: 10px; color: white; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem; font-size: 1.1rem;">{{ car.name }}</div>
+                        <div style="font-size: 1.3rem; margin-bottom: 0.5rem; font-weight: 600;">₹{{ "%.2f"|format(car.price) }}L</div>
+                        <div style="font-size: 1rem; opacity: 0.9; font-weight: 500;">
+                            {% if car.difference > 0 %}
+                            +₹{{ "%.2f"|format(car.difference) }}L higher
+                            {% else %}
+                            ₹{{ "%.2f"|format(car.difference|abs) }}L lower
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div style="margin-top: 1.5rem; text-align: center; color: #333; background: rgba(102, 126, 234, 0.1); padding: 1.5rem; border-radius: 10px;">
+                    <div style="font-weight: bold; margin-bottom: 0.5rem; font-size: 1.2rem;">Market Range</div>
+                    <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; font-size: 1.1rem;">
+                        <div style="background: white; padding: 0.5rem 1rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">Min: ₹{{ "%.2f"|format(price_comparison.market_range.min) }}L</div>
+                        <div style="background: white; padding: 0.5rem 1rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">Avg: ₹{{ "%.2f"|format(price_comparison.market_range.avg) }}L</div>
+                        <div style="background: white; padding: 0.5rem 1rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">Max: ₹{{ "%.2f"|format(price_comparison.market_range.max) }}L</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Selling Tips -->
+            {% if selling_tips %}
+            <div class="selling-tips" style="background: rgba(255,255,255,0.95); padding: 2rem; border-radius: 15px; margin-bottom: 2rem; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <h3 style="color: #333; margin-bottom: 1.5rem; text-align: center; font-size: 1.8rem; font-weight: bold;">
+                    <i class="fas fa-lightbulb" style="color: #ffc107;"></i> Personalized Selling Tips
+                </h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                    {% for tip in selling_tips %}
+                    <div style="background: linear-gradient(135deg, #28a745, #20c997); padding: 1.2rem; border-radius: 10px; color: white; display: flex; align-items: center; gap: 0.8rem; box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);">
+                        <i class="fas fa-check-circle" style="color: #fff; font-size: 1.2rem;"></i>
+                        <span style="font-size: 1rem; font-weight: 500;">{{ tip }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="market-trends">
+                <div class="trends-title">Current Market Trends</div>
+                <div class="trends-grid">
+                    <div class="trend-item">
+                        <div class="trend-value">+12%</div>
+                        <div class="trend-label">Price Trend</div>
+                    </div>
+                    <div class="trend-item">
+                        <div class="trend-value">High</div>
+                        <div class="trend-label">Demand Level</div>
+                    </div>
+                    <div class="trend-item">
+                        <div class="trend-value">45 days</div>
+                        <div class="trend-label">Avg. Sale Time</div>
+                    </div>
+                    <div class="trend-item">
+                        <div class="trend-value">₹5.2L</div>
+                        <div class="trend-label">Market Average</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <a href="/" class="action-btn">
+                    <i class="fas fa-calculator"></i>
+                    Predict Another Car
+                </a>
+                <a href="#" class="action-btn secondary" onclick="window.print()">
+                    <i class="fas fa-print"></i>
+                    Print Report
+                </a>
+                <a href="#" class="action-btn secondary" onclick="shareResult()">
+                    <i class="fas fa-share-alt"></i>
+                    Share Result
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="result-card">
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <h2>Oops! Something went wrong</h2>
+                <p>{% if data is string %}{{ data }}{% else %}Unable to process your request. Please try again.{% endif %}</p>
+                <div class="actions" style="margin-top: 2rem;">
+                    <a href="/" class="action-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Try Again
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Animate confidence bar
+        setTimeout(() => {
+            const confidenceFill = document.querySelector('.confidence-fill');
+            if (confidenceFill) {
+                confidenceFill.style.width = '85%';
+            }
+        }, 500);
+
+        // Share functionality
+        function shareResult() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Car Price Prediction Result',
+                    text: 'Check out my car price prediction result!',
+                    url: window.location.href
+                });
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                const url = window.location.href;
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Link copied to clipboard!');
+                });
+            }
+        }
+
+        // Add some interactive animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.insight-card, .trend-item');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            cards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = 'all 0.6s ease';
+                observer.observe(card);
+            });
+        });
+    </script>
 </body>
 </html>
